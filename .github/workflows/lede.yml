@@ -55,7 +55,6 @@ jobs:
           ./scripts/feeds install -a
       - name: Generate configuration file
         run : |
-          touch ./.config
           #
           # ========================== Firmware customization part ======================== ==
           # 
