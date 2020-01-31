@@ -193,7 +193,7 @@ jobs:
           # 
           # ========================== End of firmware customization section ===================== ===
           # 
-          sed -i 's / ^ [\ t] * // g' ./.config
+          sed -i 's/^[\ t]*//g' ./.config
           make defconfig
 
       - name: Make download
