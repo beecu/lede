@@ -7,14 +7,14 @@
 # <https://github.com/KFERMercer/OpenWrt-CI>
 # 
 
-name: LEDE原版0.1
+name: LEDE原版
 
 on:
-  schedule:
-    - cron: 0 20 * * *
   push:
     branches: 
       - master
+  # schedule:
+  #    - cron: 0 20 * * *
 
 jobs:
 
@@ -49,12 +49,24 @@ jobs:
           # ln -s /mnt/openwrt/feeds ./feeds
           # ln -s /mnt/openwrt/staging_dir ./staging_dir
           df -h
+          
+      - name: 自定义插件主题。
+        run: |
+          cd package
+          mkdir openwrt-packages
+          cd openwrt-packages
+          git clone https://github.com/tzxiaozhen88/luci-app-koolproxyR.git
+          git clone https://github.com/openwrt-develop/luci-theme-atmaterial.git
+          git clone https://github.com/rosywrt/luci-theme-rosy
+
       - name: Update feeds
         run: |
           ./scripts/feeds update -a
           ./scripts/feeds install -a
       - name: Generate configuration file
         run : |
+          rm -f ./.config*
+          touch ./.config
           #
           # ========================== Firmware customization part ======================== ==
           # 
@@ -83,26 +95,26 @@ jobs:
           # 
           # No matter how you want to customize the firmware, you need to modify the content in the EOF loopback.
           # 
-          Compile x64 firmware:
+          # Compile x64 firmware:
           cat >> .config << EOF
           CONFIG_TARGET_x86 = y
           CONFIG_TARGET_x86_64 = y
           CONFIG_TARGET_x86_64_Generic = y
           EOF
-          Firmware compression:
+          # Firmware compression:
           cat >> .config << EOF
           CONFIG_TARGET_IMAGES_GZIP = y
           EOF
-          Compile UEFI firmware:
+          # Compile UEFI firmware:
           cat >> .config << EOF
           CONFIG_EFI_IMAGES = y
           EOF
-          IPv6 support:
+          # IPv6 support:
           cat >> .config << EOF
           CONFIG_PACKAGE_dnsmasq_full_dhcpv6 = y
           CONFIG_PACKAGE_ipv6helper = y
           EOF
-          Multi file system support:
+          # Multi file system support:
           cat >> .config << EOF
           CONFIG_PACKAGE_kmod-fs-nfs = y
           CONFIG_PACKAGE_kmod-fs-nfs-common = y
@@ -111,7 +123,7 @@ jobs:
           CONFIG_PACKAGE_kmod-fs-ntfs = y
           CONFIG_PACKAGE_kmod-fs-squashfs = y
           EOF
-          USB3.0 support:
+          # USB3.0 support:
           cat >> .config << EOF
           CONFIG_PACKAGE_kmod-usb-ohci = y
           CONFIG_PACKAGE_kmod-usb-ohci-pci = y
@@ -119,7 +131,7 @@ jobs:
           CONFIG_PACKAGE_kmod-usb2-pci = y
           CONFIG_PACKAGE_kmod-usb3 = y
           EOF
-          Selection of common LuCI plugins:
+          # Selection of common LuCI plugins:
           cat >> .config << EOF
           CONFIG_PACKAGE_luci-app-adbyby-plus = y
           CONFIG_PACKAGE_luci-app-aria2 = y
@@ -154,13 +166,16 @@ jobs:
           CONFIG_PACKAGE_luci-app-samba4 = y
           CONFIG_PACKAGE_luci-app-ramfree = y
           CONFIG_PACKAGE_luci-app-firewall = y
+          CONFIG_PACKAGE_luci-app-koolproxyR = y
           EOF
-          LuCI Theme:
+          # LuCI Theme:
           cat >> .config << EOF
           CONFIG_PACKAGE_luci-theme-argon = y
           CONFIG_PACKAGE_luci-theme-netgear = y
+          CONFIG_PACKAGE_luci-theme-atmaterial = y
+          CONFIG_PACKAGE_luci-theme-rosy = y
           EOF
-          Common packages:
+          # Common packages:
           cat >> .config << EOF
           CONFIG_PACKAGE_curl = y
           CONFIG_PACKAGE_htop = y
@@ -170,7 +185,7 @@ jobs:
           CONFIG_PACKAGE_vim-fuller = y
           CONFIG_PACKAGE_wget = y
           EOF
-          Uncompile VMware image and image fill (don't delete indented comment symbols):
+          # Uncompile VMware image and image fill (don't delete indented comment symbols):
           cat >> .config << EOF
           # CONFIG_TARGET_IMAGES_PAD is not set
           # CONFIG_VMDK_IMAGES is not set
